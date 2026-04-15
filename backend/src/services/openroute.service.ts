@@ -49,7 +49,7 @@ export async function calculateRoute(
   const response = await fetch(`${ORS_BASE_URL}/v2/directions/driving-car`, {
     method: 'POST',
     headers: {
-      Authorization: apiKey,
+      Authorization: `Bearer ${apiKey}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
@@ -112,7 +112,6 @@ export async function geocodeSearch(query: string): Promise<GeocodeSuggestion[]>
   const apiKey = getApiKey();
 
   const params = new URLSearchParams({
-    api_key: apiKey,
     text: query.trim(),
     size: '5',
     layers: 'locality,county,region',
@@ -121,6 +120,11 @@ export async function geocodeSearch(query: string): Promise<GeocodeSuggestion[]>
 
   const response = await fetch(
     `${ORS_BASE_URL}/geocode/search?${params.toString()}`,
+    {
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+      },
+    },
   );
 
   if (!response.ok) {
