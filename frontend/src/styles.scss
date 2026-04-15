@@ -1,0 +1,23 @@
+@use '@angular/material' as mat;
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+  background: #f5f5f5;
+  color: #333;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+.mat-mdc-snack-bar-container .mdc-snackbar__surface {
+  background-color: #333;
+}
