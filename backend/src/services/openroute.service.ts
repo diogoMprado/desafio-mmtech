@@ -46,7 +46,7 @@ export async function calculateRoute(
     Number(d.latitude),
   ]);
 
-  const response = await fetch(`${ORS_BASE_URL}/v2/directions/driving-car`, {
+  const response = await fetch(`${ORS_BASE_URL}/v2/directions/driving-car/geojson`, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${apiKey}`,
@@ -54,8 +54,7 @@ export async function calculateRoute(
     },
     body: JSON.stringify({
       coordinates,
-      instructions: false,
-      geometry: true,
+      instructions: true,
     }),
   });
 
@@ -66,13 +65,15 @@ export async function calculateRoute(
   }
 
   const data: any = await response.json();
-  const route = data.routes?.[0];
+  const feature = data.features?.[0];
 
-  if (!route) {
+  if (!feature) {
     throw new AppError(502, 'Nenhuma rota encontrada');
   }
 
-  const segments: RouteSegment[] = route.segments.map(
+  const props = feature.properties;
+
+  const segments: RouteSegment[] = props.segments.map(
     (seg: { distance: number; duration: number }, idx: number) => ({
       from: destinations[idx].name,
       to: destinations[idx + 1].name,
@@ -84,10 +85,10 @@ export async function calculateRoute(
   const totalDistanceKm = segments.reduce((sum, s) => sum + s.distanceKm, 0);
   const totalDurationMinutes = segments.reduce((sum, s) => sum + s.durationMinutes, 0);
 
-  // Decode geometry (ORS returns encoded polyline by default in GeoJSON)
-  const geometry: Array<[number, number]> = route.geometry?.coordinates
-    ? route.geometry.coordinates.map((c: number[]) => [c[1], c[0]])
-    : [];
+  // GeoJSON endpoint returns coordinates directly as [lng, lat]
+  const geometry: Array<[number, number]> = (feature.geometry?.coordinates ?? []).map(
+    (c: number[]) => [c[1], c[0]] as [number, number],
+  );
 
   return {
     segments,
